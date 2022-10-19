@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "appellate-roulette"
+version = "0.1.0"
+description = "Replication files for Appellate Roulette"
+authors = ["Corey Rayburn Yung <coreyrayburnyung@gmail.com>"]
+readme = "README.md"
+packages = [{include = "appellate_roulette"}]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.12"
+numpy = "^1.23.3"
+pandas = "^1.5.0"
+scipy = "^1.9.1"
+matplotlib = "^3.6.0"
+plotly = "^5.10.0"
+joblib = "^1.2.0"
+seaborn = "^0.12.0"
+scikit-learn = "^1.1.2"
+category-encoders = "^2.5.0"
+eli5 = "^0.13.0"
+statsmodels = "^0.13.2"
+imbalanced-learn = "^0.9.1"
+mlxtend = "^0.21.0"
+xgboost = "^1.6.2"
+scikit-optimize = "^0.9.0"
+yellowbrick = "^1.5"
+shap = "^0.41.0"
+amos = "^0.1.9"
+bobbie = "0.1.1"
+holden = "^0.1.1"
+miller = "^0.1.2"
+nagata = "^0.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
