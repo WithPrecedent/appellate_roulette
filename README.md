@@ -19,30 +19,20 @@ alike, and the outcome of a legal dispute will turn on what the law requires
 rather than on the identity of the official who happens to apply it. This
 study subjects that promise to empirical scrutiny in federal criminal appeals.
 
-The federal courts of appeals assign judges to panels, and appeals to panels,
-without regard to the merits of the appeals. So within one circuit in one
-year, which three judges hear a criminal appeal is close to a spin of a wheel.
-If the promise held in practice, the spin would not matter: any three judges
-drawn from the same circuit, applying the same law to the same record with the
-same standards of review, would reach the same result. The study tests whether
-the composition of the panel that hears a criminal appeal affects its outcome.
-
 * **Cases**: the opinions of the twelve regional courts of appeals filed since
   January 1, 2010, from [CourtListener](https://www.courtlistener.com), parsed
-  and coded with [courtpy](https://github.com/WithPrecedent/CourtPy). Only the
-  opinions are collected, and not CourtListener's dockets or citations (see
-  [The opinions](#the-opinions)).
+  and coded with [courtpy](https://github.com/WithPrecedent/CourtPy). 
 * **Judges**: who each judge of a panel is, who appointed the judge, and the
   judge's sex, race, age, and career, from the Federal Judicial Center's
   [Biographical Directory of Article III Federal
   Judges](https://www.fjc.gov/history/judges).
 * **Analysis**: with [amos](https://github.com/WithPrecedent/amos), which
-  records every step and the version of every package, so that the results can
+  records every step and parameter, so that the results can
   be reproduced.
 
 ## Research design
 
-The study is described in one settings file,
+The study's methods are described in one settings file,
 [`studies/appellate_roulette.toml`](https://github.com/WithPrecedent/appellate_roulette/blob/main/studies/appellate_roulette.toml):
 
 | | |
@@ -57,55 +47,14 @@ It asks whether the outcome depends on the panel in three ways:
 1. **The wheel** (`roulette`, in
    [`roulette.py`](https://github.com/WithPrecedent/appellate_roulette/blob/main/src/appellate_roulette/roulette.py)). How far the outcomes
    of each judge's appeals, and of each kind of panel, are from the outcomes
-   of the other appeals of the same circuit and year is measured. Then the
-   wheel is spun again: the outcomes are shuffled among the appeals of each
-   circuit and year thousands of times, and the same thing is measured each
-   time, to learn how large a difference chance alone makes. The share of
-   shuffles with a difference at least as large as the real one is the
-   p-value. This is randomization inference. It assumes nothing about the
-   distribution of outcomes, how many appeals a judge hears, or how judges
-   overlap on panels.
-2. **The odds** (`fixest`). A logit model of whether the defendant won, with a
+   of the other appeals of the same circuit and year is measured. 
+2. **The odds** (`fixest`). A model of whether the defendant won, with a
    fixed effect for each circuit and each year, estimates how much one more
    judge of each kind on the panel changes the odds.
-3. **Prediction** (the `analyst`). Three models are trained to predict the
+3. **Prediction** (the `analyst`). Multiple models are trained to predict the
    outcome from the panel and the appeal, and tested on appeals that were held
    out. If the panel does not matter, shuffling its composition costs the best
    model nothing (`permutation_importance`).
-
-Before any of that, `balance` asks the first question of things that were true
-of each appeal before any judge heard it, such as the crime charged. If the
-judges were drawn at random, the draw cannot predict those things, so small
-p-values there mean that the comparison is not a fair one.
-
-Things to keep in mind:
-
-* **The draw is not perfectly random.** Courts take the availability of
-  judges into account, send appeals that return after a remand to the panel
-  that heard them before, and decide many appeals without argument on
-  screening panels or summary calendars that are composed differently. Adam
-  S. Chilton and Marin K. Levy found departures from randomness in several
-  circuits (see [Similar Projects](#similar-projects)). Read `balance` before
-  `roulette`.
-* **Appeals are heard in sittings.** A panel hears several appeals together,
-  so its appeals are not independent draws. Shuffling the outcomes appeal by
-  appeal treats them as if they were, which makes p-values somewhat too small
-  if the appeals of one sitting are more alike than those of another.
-* **Criminal appeals and outcomes are found by rules.** courtpy decides that
-  a case is criminal, who brought the appeal, and who won, with rules in CSV
-  files that anyone can read and change. Check them against a sample of
-  opinions. An outcome is what the opinion says the court did, so a defendant
-  who wins a remand on one of five issues "won".
-* **Only decisions with an opinion that CourtListener has are studied.**
-  Courts differ, and have changed, in how many of their unpublished orders
-  they post. See [The opinions](#the-opinions) for the decisions from 2010 to
-  2018 that are left out.
-* **Judges are matched by name.** A panel is used only if all three of its
-  judges are found in the roster. Panels with a visiting judge are the
-  likeliest to be left out.
-* **Many attributes are tested.** One small p-value among a dozen attributes
-  is what chance produces. The test of the judges, and the joint test of the
-  composition, are each a single test.
 
 ## The opinions
 
@@ -153,10 +102,7 @@ court and day that is found, so they appear to be second copies. About a
 quarter (some 7,600, or 2% of all decisions) have no counterpart. Those are
 concentrated in 2010 and 2018, and a third of them are filed under the D.C.
 Circuit, where many are opinions of the district court that the dockets
-attribute to the court of appeals. The opening words of an opinion are not
-used to find its court, because they name the court below far more often than
-their own: a rule that read them found 155 more decisions and 45,000 opinions
-of other courts, most of them orders of the Supreme Court denying certiorari.
+attribute to the court of appeals. 
 
 Two ways to add the decisions that are left out, both of which skip the cases
 that are already saved:
@@ -274,32 +220,6 @@ The tables to read first:
 | `src/appellate_roulette/instructions/courts.csv` | The rules that find the court of an opinion. |
 | `src/appellate_roulette/roulette.py` | `roulette`, `balance`, and `spin`, which test whether the draw of judges matters. |
 | `tests/` | Tests, with fictional judges and cases. |
-
-## Contributing
-
-Contributors are always welcome. Feel free to grab an [issue](https://www.github.com/WithPrecedent/appellate_roulette/issues) to work on or make a suggested improvement. If you wish to contribute, please read the [Contribution Guide](https://www.github.com/WithPrecedent/appellate_roulette/blob/main/CONTRIBUTING.md) and [Code of Conduct](https://www.github.com/WithPrecedent/appellate_roulette/blob/main/CODE_OF_CONDUCT.md).
-
-## Similar Projects
-
-* [courtpy](https://github.com/WithPrecedent/CourtPy) and
-  [amos](https://github.com/WithPrecedent/amos), which this study is built on,
-  and [trump_judges](https://github.com/WithPrecedent/trump_judges), a study
-  of the same appeals by the president who appointed each judge.
-* Cass R. Sunstein, David Schkade, Lisa M. Ellman, and Andres Sawicki, *Are
-  Judges Political? An Empirical Analysis of the Federal Judiciary* (2006),
-  which studies how the votes of judges on panels of the courts of appeals
-  vary with the party of the presidents who appointed them and their
-  colleagues.
-* Adam S. Chilton and Marin K. Levy, *Challenging the Randomness of Panel
-  Assignment in the Federal Courts of Appeals*, 101 Cornell Law Review 1
-  (2015), which tests the assumption that this study depends on.
-* David S. Abrams, Marianne Bertrand, and Sendhil Mullainathan, *Do Judges
-  Vary in Their Treatment of Race?*, 41 Journal of Legal Studies 347 (2012),
-  which compares differences among randomly assigned trial judges with those
-  that simulated random assignment produces.
-* James M. Anderson, Jeffrey R. Kling, and Kate Stith, *Measuring Interjudge
-  Sentencing Disparity: Before and After the Federal Sentencing Guidelines*,
-  42 Journal of Law and Economics 271 (1999).
 
 ## Acknowledgments
 
