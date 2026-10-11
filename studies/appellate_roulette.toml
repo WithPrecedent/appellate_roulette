@@ -1,0 +1,266 @@
+# Appellate roulette: does it matter which judges hear a federal criminal
+# appeal?
+#
+# The rule of law promises that like cases will be treated alike: that the
+# outcome of a dispute turns on what the law requires, and not on who
+# happens to apply it. The federal courts of appeals assign judges to
+# panels, and cases to panels, without regard to the merits of the cases. So
+# if the promise held, the composition of a panel would not matter: any
+# three judges of a circuit, applying the same law to the same record, would
+# reach the same result.
+#
+# Each row is one criminal appeal brought by the defendant and decided by a
+# three-judge panel of one of the twelve regional courts of appeals since
+# January 1, 2010. The label is whether the defendant won. The study asks
+# whether it depends on the panel in three ways:
+#
+# * "wheel" spins the wheel again (see "appellate_roulette.roulette"). It
+#   shuffles the outcomes among the appeals of each circuit and year, many
+#   times, to learn how much the outcomes of different judges and of
+#   different kinds of panels would differ by chance alone, and compares
+#   that with how much they do differ. First it asks the same of what was
+#   true of each appeal before any judge heard it ("balance"), since the
+#   comparison is only fair if the draw of judges has nothing to do with the
+#   cases.
+# * "inference" estimates how much each attribute of a panel changes the
+#   odds: a logit model with a fixed effect for each circuit and each year
+#   (fixest), fitted to every appeal.
+# * "analyst" asks whether knowing the panel helps to predict the outcome:
+#   an experiment of three models, each checked with cross-validation and
+#   scored on appeals held out. The critic and artist then show how much
+#   the panel matters to the best model.
+#
+# Run it from a terminal, in the project's root folder, after making the
+# roster of judges once ("uv run appellate-roulette judges"):
+#
+#     uv run appellate-roulette run studies/appellate_roulette.toml --export
+#
+# The first run extracts the opinions from CourtListener's bulk data (two
+# files of about 58 GB, kept outside the project and used again by later
+# runs), which takes from half an hour to an hour to read once they are
+# downloaded, and then parses them. The coded appeals are saved in
+# "data/appeals.csv", and later runs reuse them. Delete that file (or set
+# "reuse = false") after changing the loader's parameters or the rules.
+
+[general]
+seed = 43
+label = "outcome_criminal_defendant_won"
+
+# The opinions are kept (and the coded table saved) in "data", and the
+# results are exported to "results".
+[files]
+input_folder = "data"
+interim_folder = "data"
+output_folder = "results"
+
+[appeals_project]
+appeals_workers = "wrangler, wheel, selector, explorer, inference, analyst, critic, artist"
+
+# The wrangler loads the appeals, keeps the criminal appeals that the
+# defendant brought and that three judges decided, all of whom were found in
+# the roster (so that the composition of the panel is right), keeps each
+# appeal once, and counts the judges of each kind on each panel.
+[wrangler]
+techniques = "load_opinions, drop_missing, filter_rows, drop_duplicates, convert_types, derive_columns"
+
+[load_opinions_parameters]
+# The folder of saved cases, in "data".
+source = "court_listener"
+# "opinions" extracts the cases from the two bulk files of CourtListener
+# that hold opinions, and not from its dockets or citations. The court of
+# each opinion is found from the opinion itself, which finds 92% of the
+# decisions since 2010 (every one since 2020): see the README for the ones
+# that it cannot find and two ways to add them. "none" parses the cases
+# that are already in the folder.
+download = "opinions"
+# The twelve regional circuits. The Federal Circuit ("cafc") hears no
+# criminal appeals.
+courts = "federal_circuits"
+start_date = "2010-01-01"
+# No "end_date": every case filed through the newest bulk data.
+# Only the cases that name the United States as a party, as every federal
+# criminal appeal does. They are about two fifths of the cases, so this
+# saves more than half of the space and of the time to parse them. Remove
+# it to collect every case.
+parties = "United States"
+# courtpy's federal rules, and the issues of criminal appeals that they do
+# not find.
+rulebooks = "federal, studies/criminal_issues.csv"
+workers = 8
+# courtpy's coders find the parties, whether each case is criminal, who
+# brought the appeal, and who won (the label). "code_judges" finds each
+# panel's judges in the roster ("panel_names" and "panel_found") and adds
+# the composition of the panel: the mean of each attribute of its judges.
+coders = "code_parties, code_case_type, code_outcome, code_judges"
+save = "appeals.csv"
+reuse = true
+
+# Who brought the appeal, or who won, is unknown in some cases.
+[drop_missing_parameters]
+columns = ["outcome_criminal_defendant_won", "appeal_by_defendant", "court_num", "year"]
+
+# A panel is three judges, all found in the roster. That leaves out the
+# courts sitting en banc and the panels with a judge whose name fits no
+# judge, or more than one.
+[filter_rows_parameters]
+query = "type_criminal and appeal_by_defendant and panel_size == 3 and panel_found == 3"
+
+# CourtListener holds some decisions more than once (about 3% of those
+# that name the United States): an opinion that a court posted twice, or
+# an opinion and an order in one appeal. An appeal that is counted twice
+# has the same judges and the same outcome both times, which would make
+# the judges look as if they mattered. So one decision is kept for each
+# court, day, and name of a case.
+[drop_duplicates_parameters]
+columns = ["court", "date_filed", "case_name"]
+
+# The label has no missing values left, so it is made plain booleans.
+[convert_types_parameters.types]
+outcome_criminal_defendant_won = "bool"
+
+# "code_judges" gives the mean of each attribute among the three judges of a
+# panel, so three times a mean is a count. The party of the president who
+# appointed a judge is -1 for a Democrat and 1 for a Republican, so a mean
+# of -1 is three Democratic appointees and a mean of 1 is none.
+[derive_columns_parameters.expressions]
+democratic_appointees = "(1.5 * (1 - panel_party)).round()"
+women = "(3 * panel_woman).round()"
+minority_judges = "(3 * panel_minority).round()"
+former_prosecutors = "(3 * panel_prosecutor).round()"
+former_defenders = "(3 * panel_public_defender).round()"
+visiting_judges = "(3 * panel_designated).round()"
+senior_judges = "(3 * panel_senior).round()"
+
+# The wheel: is the draw of judges unrelated to the cases, and does it
+# change their outcomes? Both shuffle within each circuit and year.
+[wheel]
+techniques = "balance, roulette"
+
+# What was true of each appeal before its judges were drawn: the crime and
+# the kind of proceeding. (The opinion is where they are found, but the
+# panel did not choose them.)
+[balance_parameters]
+covariates = [
+    "criminal_drugs", "criminal_firearm", "criminal_child_porn",
+    "criminal_wire_fraud", "criminal_robbery", "criminal_murder",
+    "criminal_conspiracy", "criminal_crimmigration", "criminal_guilty_plea",
+    "issue_supervised_release", "issue_section_2255",
+]
+strata = ["court_num", "year"]
+simulations = 1000
+
+[roulette_parameters]
+strata = ["court_num", "year"]
+simulations = 5000
+# A judge with fewer appeals than this is left out of the test of the
+# judges (but not of the composition of the panels).
+minimum = 30
+
+# The selector keeps the features: the composition of the panel first (so
+# that the coefficient plot can draw only it), the circuit and the year, and
+# what the appeal was about. Columns that record the outcome itself, and
+# those that the panel chose (whether to publish, and what to discuss about
+# the standard of review or harmless error), are left out. Issues found in
+# too few appeals to estimate are removed by "variance_threshold".
+[selector]
+techniques = "keep_columns, variance_threshold"
+
+[keep_columns_parameters]
+columns = [
+    # The composition of the panel.
+    "democratic_appointees", "women", "minority_judges",
+    "former_prosecutors", "former_defenders", "visiting_judges",
+    "senior_judges", "panel_age",
+    # The circuit and the year.
+    "court", "year",
+    # Offenses and sentencing (courtpy's federal rules).
+    "criminal_acca", "criminal_assault", "criminal_bank_fraud",
+    "criminal_bank_robbery", "criminal_bribery", "criminal_child_porn",
+    "criminal_child_sexual", "criminal_conspiracy", "criminal_counterfeit",
+    "criminal_crimmigration", "criminal_death_penalty", "criminal_drugs",
+    "criminal_embezzlement", "criminal_extortion",
+    "criminal_false_statements", "criminal_firearm", "criminal_guilty_plea",
+    "criminal_kidnapping", "criminal_money_launder", "criminal_murder",
+    "criminal_obst_just", "criminal_perjury", "criminal_rico",
+    "criminal_robbery", "criminal_sentencing", "criminal_sorna",
+    "criminal_tax_evasion", "criminal_terrorism", "criminal_wire_fraud",
+    # Collateral review (courtpy's federal rules).
+    "civil_habeas", "civil_aedpa",
+    # The issues of criminal appeals in "studies/criminal_issues.csv".
+    "issue_suppression", "issue_sufficiency", "issue_ineffective_assistance",
+    "issue_jury_instructions", "issue_confrontation", "issue_brady",
+    "issue_speedy_trial", "issue_double_jeopardy",
+    "issue_other_acts_evidence", "issue_plea_withdrawal",
+    "issue_appeal_waiver", "issue_reasonableness", "issue_upward_variance",
+    "issue_guidelines_enhancement", "issue_crime_of_violence",
+    "issue_supervised_release", "issue_compassionate_release",
+    "issue_sentence_reduction", "issue_section_2255", "issue_restitution",
+]
+
+# A flag's variance is p * (1 - p), so 0.002 removes flags found in fewer
+# than about 0.2% (or more than 99.8%) of the appeals.
+[variance_threshold_parameters]
+threshold = 0.002
+
+[explorer]
+techniques = "summarize, label_balance, frequencies"
+
+# The odds: a logit model of whether the defendant won, with a fixed effect
+# for each circuit and each year, fitted to every appeal. exp(coefficient)
+# is the odds ratio of one more judge of a kind on the panel.
+[inference]
+techniques = "fixest"
+
+[fixest_parameters]
+fixed_effects = ["court", "year"]
+
+# Prediction: each model is cross-validated on the training appeals and
+# scored on the test appeals.
+[analyst]
+design = "experiment"
+criterion = "roc_auc"
+steps = "split, encode, model, validate"
+split_techniques = "stratified"
+encode_techniques = "one_hot"
+model_techniques = "logit, random_forest, gradient_boosting"
+validate_techniques = "stratified_k_fold"
+
+[stratified_parameters]
+test_size = 0.25
+
+[logit_parameters]
+max_iter = 2000
+
+[random_forest_parameters]
+n_estimators = 300
+min_samples_leaf = 5
+
+[stratified_k_fold_parameters]
+n_splits = 5
+
+[critic]
+techniques = "scorecard, confusion, permutation_importance"
+
+# Accuracy says little when one class is rare, so the features are ranked by
+# how much shuffling them lowers the area under the ROC curve. If the panel
+# does not matter, shuffling its composition costs the model nothing.
+[permutation_importance_parameters]
+scoring = "roc_auc"
+
+[artist]
+techniques = "coefficient_plot, roc_curve, importance_plot, partial_dependence"
+
+[coefficient_plot_parameters]
+source = "fixest_coefficients"
+limit = 8
+title = "Log odds that the defendant wins, by the composition of the panel"
+
+[roc_curve_parameters]
+title = "How well the best model separates wins from losses"
+
+[importance_plot_parameters]
+title = "The features whose shuffling lowers the ROC AUC most"
+
+[partial_dependence_parameters]
+title = "The best model's chance of a win, by the composition of the panel"
+features = ["democratic_appointees", "women", "former_prosecutors"]

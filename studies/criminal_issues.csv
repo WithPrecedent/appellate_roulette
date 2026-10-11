@@ -1,0 +1,22 @@
+target,variable,kind,pattern,value,ignorecase,dotall,note
+opinion,issue_suppression,flag,motion to suppress|suppress(?:ed|ion of)? (?:the )?(?:evidence|statements?)|exclusionary rule,,TRUE,FALSE,A motion to suppress evidence or statements
+opinion,issue_sufficiency,flag,sufficiency of the evidence|(?:in)?sufficient evidence to (?:convict|support)|evidence (?:was|is) (?:in)?sufficient|Jackson v\. Virginia|443 U\.S\. 307|judgment of acquittal,,TRUE,FALSE,Whether the evidence supported the conviction
+opinion,issue_ineffective_assistance,flag,ineffective assistance|Strickland v\. Washington|466 U\.S\. 668,,TRUE,FALSE,Ineffective assistance of counsel
+opinion,issue_jury_instructions,flag,jury instructions?|instruct(?:ed|ing) the jury|charge to the jury,,TRUE,FALSE,A challenge to the jury instructions
+opinion,issue_confrontation,flag,Confrontation Clause|Crawford v\. Washington|541 U\.S\. 36,,TRUE,FALSE,The Sixth Amendment's Confrontation Clause
+opinion,issue_brady,flag,Brady v\. Maryland|373 U\.S\. 83|Giglio v\. United States|exculpatory evidence,,TRUE,FALSE,Suppressed exculpatory or impeachment evidence
+opinion,issue_speedy_trial,flag,speedy trial,,TRUE,FALSE,The Speedy Trial Act or the Sixth Amendment's right to a speedy trial
+opinion,issue_double_jeopardy,flag,double jeopardy,,TRUE,FALSE,
+opinion,issue_other_acts_evidence,flag,404\(b\)|other[- ]acts? evidence|prior bad acts,,TRUE,FALSE,Evidence of other crimes or acts (Fed. R. Evid. 404(b))
+opinion,issue_plea_withdrawal,flag,withdraw (?:his|her|their|the|a) (?:guilty )?plea|plea withdrawal|Rule 11 (?:colloquy|hearing)|Fed\. R\. Crim\. P\. 11,,TRUE,FALSE,Withdrawing a guilty plea or the plea colloquy
+opinion,issue_appeal_waiver,flag,appeal waiver|appellate waiver|waive[ds]? (?:his|her|their|the) (?:right to )?appeal|waiver of (?:his|her|their|the) right to appeal,,TRUE,FALSE,A waiver of the right to appeal in a plea agreement
+opinion,issue_reasonableness,flag,(?:substantive|procedural)(?:ly)? (?:un)?reasonable|Gall v\. United States|552 U\.S\. 38,,TRUE,FALSE,The reasonableness of the sentence
+opinion,issue_upward_variance,flag,upward variance|upward departure|above the (?:advisory )?guidelines? range|above-guidelines,,TRUE,FALSE,A sentence above the guidelines range
+opinion,issue_guidelines_enhancement,flag,(?:two|three|four|five|six|eight|ten|twelve|sixteen)-level (?:enhancement|increase)|career offender|U\.?S\.?S\.?G\.? § ?[23][A-Z]\d,,TRUE,FALSE,An enhancement or the career offender guideline
+opinion,issue_crime_of_violence,flag,crime of violence|violent felony|categorical approach|controlled substance offense,,TRUE,FALSE,Whether a prior offense counts (categorical approach)
+opinion,issue_supervised_release,flag,"revo(?:ke|ked|king|cation)[^.]{0,60}supervised release|conditions? of supervised release|§ 3583\(e\)",,TRUE,FALSE,Revoking supervised release or its conditions
+opinion,issue_compassionate_release,flag,compassionate release|3582\(c\)\(1\)\(A\)|extraordinary and compelling,,TRUE,FALSE,A motion for compassionate release
+opinion,issue_sentence_reduction,flag,3582\(c\)\(2\)|First Step Act|Amendment 821|motion (?:for|to) reduce (?:his|her|their|the) sentence,,TRUE,FALSE,A motion to reduce a sentence after a change in the law
+opinion,issue_section_2255,flag,"§ 2255|section 2255|motion to vacate[^.]{0,20}set aside[^.]{0,20}correct",,TRUE,FALSE,A motion to vacate a federal sentence (collateral review)
+opinion,issue_restitution,flag,restitution,,TRUE,FALSE,
+opinion,standard_plain_error,flag,plain[- ]error|United States v\. Olano|507 U\.S\. 725,,TRUE,FALSE,Review for plain error (an issue not raised below)

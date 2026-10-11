@@ -1,0 +1,31 @@
+target,variable,kind,pattern,value,ignorecase,dotall,note
+address,court,label,[/.]bap\d|/bap/|/\d\db\d{4}[np]-06\.pdf,other,TRUE,FALSE,"A bankruptcy appellate panel with a website (or a folder of a court's website) of its own, or with a ""b"" in the name of its file on the website of the Sixth Circuit"
+opening,court,label,"^\s*BY\s+ORDER\s+OF\s+THE\s+BANKRUPTCY\s+APPELLATE\s+PANEL|^(?:(?!COURT\s+OF\s+APPEALS).){0,300}?(?:UNITED\s+STATES\s+BANKRUPTCY\s+APPELLATE\s+PANEL\s+(?:OF|FOR)\s+THE|FILE\s+NAME:\s*\S+\s+BANKRUPTCY\s+APPELLATE\s+PANEL)",other,TRUE,TRUE,"A bankruptcy appellate panel whose opinions are on the website of its circuit: the panel is named as the court at the top of the opinion (a court of appeals that reviews a panel's decision only mentions the panel, and names itself first)"
+address,court,label,[/.]ca1\.uscourts\.gov|USCOURTS-ca1-,ca1,TRUE,FALSE,"The website of the court that an opinion was collected from, or its package at govinfo.gov"
+address,court,label,[/.]ca2\.uscourts\.gov|USCOURTS-ca2-,ca2,TRUE,FALSE,
+address,court,label,[/.]ca3\.uscourts\.gov|USCOURTS-ca3-,ca3,TRUE,FALSE,
+address,court,label,[/.]ca4\.uscourts\.gov|USCOURTS-ca4-,ca4,TRUE,FALSE,
+address,court,label,[/.]ca5\.uscourts\.gov|USCOURTS-ca5-,ca5,TRUE,FALSE,
+address,court,label,[/.]ca6\.uscourts\.gov|USCOURTS-ca6-,ca6,TRUE,FALSE,
+address,court,label,[/.]ca7\.uscourts\.gov|USCOURTS-ca7-,ca7,TRUE,FALSE,
+address,court,label,[/.]ca8\.uscourts\.gov|USCOURTS-ca8-,ca8,TRUE,FALSE,
+address,court,label,[/.]ca9\.uscourts\.gov|USCOURTS-ca9-,ca9,TRUE,FALSE,
+address,court,label,[/.]ca10\.uscourts\.gov|USCOURTS-ca10-,ca10,TRUE,FALSE,
+address,court,label,[/.]ca11\.uscourts\.gov|USCOURTS-ca11-,ca11,TRUE,FALSE,
+address,court,label,[/.]cadc\.uscourts\.gov|USCOURTS-cadc-,cadc,TRUE,FALSE,
+address,court,label,[/.]cafc\.uscourts\.gov|USCOURTS-cafc-,cafc,TRUE,FALSE,
+address,court,label,.,other,TRUE,FALSE,"Any other address: an opinion collected from the website of another court (such as a state court that answers a question certified by a court of appeals, and names it in its headmatter)"
+headmatter,named,section,"^(?:(?!DISTRICT\s+COURT|BANKRUPTCY\s+COURT|BANKRUPTCY\s+APPELLATE\s+PANEL|SUPREME\s+COURT|SUPERIOR\s+COURT|TAX\s+COURT|COURT\s+OF\s+(?:FEDERAL\s+)?CLAIMS|COURT\s+OF\s+INTERNATIONAL\s+TRADE|VETERANS\s+CLAIMS|ARMED\s+FORCES|CERTIORARI|CERTIFI).)*?(?:UNITED\s+STATES|U\.\s?S\.)\s+COURT\s+OF\s+APPEALS(?:(?!COURT\s+OF).){0,80}?\b(?:FIRST|SECOND|THIRD|FOURTH|FIFTH|SIXTH|SEVENTH|EIGHTH|NINTH|TENTH|ELEVENTH|DISTRICT\s+OF\s+COLUMBIA|D\.\s?C\.|FEDERAL)\s+CIRCUIT",,TRUE,TRUE,"The headmatter of a case up to the first court of appeals that it names (as in ""United States Court of Appeals, First Circuit""), unless something else comes first that shows that the court of appeals is not the court of the case: another court, or the ""certiorari to"" or ""certified question from"" of a court that reviews or answers it. An opinion with neither an address nor headmatter is left out: its opening text names the court below far more often than its own"
+named,court,label,FIRST\s+CIRCUIT$,ca1,TRUE,FALSE,The circuit that ends that text
+named,court,label,SECOND\s+CIRCUIT$,ca2,TRUE,FALSE,
+named,court,label,THIRD\s+CIRCUIT$,ca3,TRUE,FALSE,
+named,court,label,FOURTH\s+CIRCUIT$,ca4,TRUE,FALSE,
+named,court,label,FIFTH\s+CIRCUIT$,ca5,TRUE,FALSE,
+named,court,label,SIXTH\s+CIRCUIT$,ca6,TRUE,FALSE,
+named,court,label,SEVENTH\s+CIRCUIT$,ca7,TRUE,FALSE,
+named,court,label,EIGHTH\s+CIRCUIT$,ca8,TRUE,FALSE,
+named,court,label,NINTH\s+CIRCUIT$,ca9,TRUE,FALSE,
+named,court,label,TENTH\s+CIRCUIT$,ca10,TRUE,FALSE,
+named,court,label,ELEVENTH\s+CIRCUIT$,ca11,TRUE,FALSE,
+named,court,label,(?:COLUMBIA|C\.)\s+CIRCUIT$,cadc,TRUE,FALSE,
+named,court,label,FEDERAL\s+CIRCUIT$,cafc,TRUE,FALSE,
