@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 <!-- insertion marker -->
 
+## 0.0.2
+
+* Updated to the `snickerdoodle` 0.4.0 template
+* Made `ruff` prefer single quotes
+* Made `ruff` ignore boolean default positional arguments (`FBT002`)
+* Fixed typos in the contributing guide and noted that the project does not use a code formatter
+
 ## 0.0.1
 
 The project was rewritten as a study of whether the composition of the panel
